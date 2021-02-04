@@ -34,4 +34,10 @@ Game Ideas Not Yet Covered:
 - Smooth 2D Character Animations
 - Card Game 
 - More Advanced Physics 
-- 2D GUI
+- 2D GUI System
+- Menu System
+- Particle/etc effects:
+    - Weather, Blood, Magic 
+- Pet Battle Game (Pokemon)
+- Terminal/Hacking Game
+- Roguelite rpg 
