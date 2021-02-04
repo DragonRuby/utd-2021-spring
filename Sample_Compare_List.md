@@ -1,4 +1,4 @@
-Current Samples:
+Current Samples: NOTE: (Most of the samples are very simple and rudimentary)
 - Ruby Tutorial
 - Rendering Basics 
 - Input Basics
@@ -19,5 +19,16 @@ Current Samples:
 - C extensions
 - Path finding algorithms 
 - Genre: 
-    - 3D, Arcade, Crafting, Dev Tools, Lowrez, Platformer, Narrative,
-        Roguelike, Tatical, Topdown 
+    - 3D, Arcade, Crafting, Dev Tools, Lowrez, Platformer, Roguelike, Tatical, Topdown
+    - Narrative: Text Choose Your Own Adventure, Other: (Walk around env text game)
+         
+
+Game Ideas Not Yet Covered: 
+- Genre:
+    - Tetris
+    - Double jump, smooth, quick platformer 
+    - Isometric RPG/Combat 
+    - Combat of almost any kind 
+    - Inventory System
+    - Text wrapping and response system
+    - 
