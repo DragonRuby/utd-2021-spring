@@ -24,11 +24,14 @@ Current Samples: NOTE: (Most of the samples are very simple and rudimentary)
          
 
 Game Ideas Not Yet Covered: 
-- Genre:
-    - Tetris
-    - Double jump, smooth, quick platformer 
-    - Isometric RPG/Combat 
-    - Combat of almost any kind 
-    - Inventory System
-    - Text wrapping and response system
-    - 
+- Tetris
+- Double jump, smooth, quick platformer 
+- Isometric RPG/Combat 
+- Combat of almost any kind 
+- Inventory System
+- Text wrapping and response system
+- Turn based action rpg 
+- Smooth 2D Character Animations
+- Card Game 
+- More Advanced Physics 
+- 2D GUI
