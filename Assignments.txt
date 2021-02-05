@@ -11,3 +11,7 @@ Week 1 Teams:
                         Future: Terrian behavior, fluid dynamics, etc. 
 
     Due on Tuesday: List of Sample Apps that will help us
+
+    Also:
+    Create GitHub issues for each, and a directory with your code in it (one directory for each sample)
+    Make a screenshot that shows what you think the task is
