@@ -1,0 +1,13 @@
+Week 1 Teams:
+    Duffy + Ruby    --> Turn Based Combat based on Pokemon 
+                        Select and item 
+
+    Vulcan + Jetra  --> Physics + Collision Ex4: Terrain Destruction 
+     + Pyrosiz          Ground made of blocks where char can move back and forth and 
+                        can destroy block below them and fall and can jump 
+                        use other key to designate if press down destroy block and go down 
+                        if press up then jump 
+
+                        Future: Terrian behavior, fluid dynamics, etc. 
+
+    Due on Tuesday: List of Sample Apps that will help us
