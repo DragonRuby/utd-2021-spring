@@ -41,3 +41,18 @@ Game Ideas Not Yet Covered:
 - Pet Battle Game (Pokemon)
 - Terminal/Hacking Game
 - Roguelite rpg 
+- Diagonals/Ramps
+- Loop-de-loops
+- Screen Shake
+- Cake mechanic 
+- Barrel Rolling 
+- On rails 2D movement - (minecart in Donkey Kong???)
+- HP, Magic/Mana systems, etc. 
+- Destructable Terrain 
+- Procedural Generation 
+- Collosion against diagnonal walls 
+- Supply Chain Genre Game 
+- Vaulting/Z-Changing - 2.5D Stuff 
+- Wall sliding (Celeste)
+- Puzzle Game --> Moveble terrain 
+- 
