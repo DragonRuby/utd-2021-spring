@@ -61,15 +61,15 @@ class PoorManPlatformerPhysics
 
     # Sets a black background on the screen (Comment this line out and the background will become white.)
     # Also note that black is the default color for when no color is assigned.
-    outputs.solids << grid.rect
+    #outputs.solids << grid.rect
 
     # The position, size, and color (white) are set for borders given to the world collection.
     # Try changing the color by assigning different numbers (between 0 and 255) to the last three parameters.
     outputs.borders << state.world.map do |x, y|
       [x * state.tile_size,
-       y * state.tile_size,
-       state.tile_size,
-       state.tile_size, 255, 255, 255]
+        y * state.tile_size,
+        state.tile_size,
+        state.tile_size, 255, 255, 255]
     end
 
     # The top, bottom, and sides of the borders for collision_rects are different colors.
@@ -176,8 +176,8 @@ class PoorManPlatformerPhysics
     # Goes through world_collision_rects to find all intersections between the bottom of player's rect and
     # the top of a world_collision_rect (hence the "-0.1" above)
     floor_collisions = state.world_collision_rects
-                           .find_all { |r| r[:top].intersect_rect?(player_rect, collision_tollerance) }
-                           .first
+                            .find_all { |r| r[:top].intersect_rect?(player_rect, collision_tollerance) }
+                            .first
 
     return unless floor_collisions # return unless collision occurred
     state.y = floor_collisions[:top].top # player's y is set to the y of the top of the collided rect
@@ -192,8 +192,8 @@ class PoorManPlatformerPhysics
     # Goes through world_collision_rects to find all intersections beween the player's left side and the
     # right side of a world_collision_rect.
     left_side_collisions = state.world_collision_rects
-                               .find_all { |r| r[:left_right].intersect_rect?(player_rect, collision_tollerance) }
-                               .first
+                                .find_all { |r| r[:left_right].intersect_rect?(player_rect, collision_tollerance) }
+                                .first
 
     return unless left_side_collisions # return unless collision occurred
 
@@ -267,21 +267,29 @@ class PoorManPlatformerPhysics
 
   # Processes input from the user on the keyboard.
   def process_inputs
+    if inputs.mouse.down
+      state.world_lookup = {}
+      x, y = to_coord inputs.mouse.down.point  # gets x, y coordinates for the grid --> Determines where boxes are placed
 
-
-
-
-  gridx = ((state.x)/64).round
-    gridy = ((state.y-10)/64).round
-    if inputs.keyboard.key_held.shift
-    outputs.labels << [grid.left.shift_right(5), grid.top.shift_down(5), "x is #{gridx} and y is #{gridy}",0, 0, 255,   0,   0]
+      if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
+        #state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
+        puts "Click Delete block at: x = #{x} y = #{y}"
+      else
+        state.world << [x, y] # If no duplicates, adds to world collection
+      end
     end
 
+    #display current player position
+    gridx = ((state.x)/64).round
+    gridy = ((state.y)/64).round
+    if inputs.keyboard.key_held.r
+      outputs.labels << [grid.left.shift_right(5), grid.top.shift_down(5), "x is #{gridx} and y is #{gridy}",0, 0, 255,   0,   0]
+    end
+
+    #remove block above character  
     if inputs.keyboard.key_down.w
       state.world_lookup = {}
-
-      x, y = gridx,gridy+1  # gets x, y coordinates for the grid
-      
+      x, y = gridx,gridy+1  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
@@ -290,11 +298,10 @@ class PoorManPlatformerPhysics
       end
     end
 
+    #remove block below character 
     if inputs.keyboard.key_down.s
       state.world_lookup = {}
-
-      x, y = gridx,gridy-1  # gets x, y coordinates for the grid
-      
+      x, y = gridx,gridy-1  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
@@ -303,11 +310,10 @@ class PoorManPlatformerPhysics
       end
     end
 
+    #remove block to the left of the character 
     if inputs.keyboard.key_down.a
       state.world_lookup = {}
-
-      x, y = gridx-1,gridy  # gets x, y coordinates for the grid
-      
+      x, y = gridx-1,gridy  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
@@ -316,18 +322,17 @@ class PoorManPlatformerPhysics
       end
     end
 
+    #remove block to the right of the character 
     if inputs.keyboard.key_down.d
       state.world_lookup = {}
-
-      x, y = gridx+1,gridy  # gets x, y coordinates for the grid
-      
+      x, y = gridx+1,gridy  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
       else
         state.world << [x, y] # If no duplicates, adds to world collection
       end
-    end
+    end 
 
     # Sets dx to 0 if the player lets go of arrow keys.
     if inputs.keyboard.key_up.right
@@ -342,8 +347,6 @@ class PoorManPlatformerPhysics
     elsif inputs.keyboard.key_held.left # if left key is pressed
       state.dx = -3
     end
-
-    
 
     #Sets dy to 5 to make the player ~fly~ when they press the space bar
     if inputs.keyboard.key_held.space
@@ -362,31 +365,4 @@ class PoorManPlatformerPhysics
   def collision_tollerance
     0.0
   end
-end
-
-$platformer_physics = PoorManPlatformerPhysics.new
-
-def tick args
-    
-  $platformer_physics.grid    = args.grid
-  $platformer_physics.inputs  = args.inputs
-  $platformer_physics.state    = args.state
-  $platformer_physics.outputs = args.outputs
-  $platformer_physics.tick
-  tick_instructions args, "Sample app shows platformer collisions. CLICK to place box. ARROW keys to move around. SPACE to jump."
-  
-end
-
-def tick_instructions args, text, y = 715
-  return if args.state.key_event_occurred
-  if args.inputs.mouse.click ||
-     args.inputs.keyboard.directional_vector ||
-     args.inputs.keyboard.key_down.enter ||
-     args.inputs.keyboard.key_down.escape
-    args.state.key_event_occurred = true
-  end
-
-  args.outputs.debug << [0, y - 50, 1280, 60].solid
-  args.outputs.debug << [640, y, text, 1, 1, 255, 255, 255].label
-  args.outputs.debug << [640, y - 25, "(click to dismiss instructions)" , -2, 1, 255, 255, 255].label
 end
