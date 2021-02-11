@@ -46,6 +46,7 @@ class PoorManPlatformerPhysics
   def defaults
     state.tile_size               = 64
     state.gravity                 = -0.2
+    state.char_size               = 56
     state.previous_tile_size    ||= state.tile_size
     state.x                     ||= 0
     state.y                     ||= 800
@@ -75,19 +76,19 @@ class PoorManPlatformerPhysics
     # The top, bottom, and sides of the borders for collision_rects are different colors.
     outputs.borders << state.world_collision_rects.map do |e|
       [
-        [e[:top],                             0, 170,   0], # top is a shade of green
-        [e[:bottom],                          0, 100, 170], # bottom is a shade of greenish-blue
-        [e[:left_right],                    170,   0,   0], # left and right are a shade of red
+        [e[:top],                             196, 98, 16], # top is a shade of green
+        [e[:bottom],                          196, 98, 16], # bottom is a shade of greenish-blue
+        [e[:left_right],                      196, 98, 16], # left and right are a shade of red
       ]
     end
 
     # Sets the position, size, and color (a shade of green) of the borders of only the player's
     # box and outputs it. If you change the 180 to 0, the player's box will be black and you
     # won't be able to see it (because it will match the black background).
-    outputs.borders << [state.x,
+    outputs.solids << [state.x,
                         state.y,
-                        state.tile_size,
-                        state.tile_size,  0, 180, 0]
+                        state.char_size,
+                        state.char_size,  0, 180, 0]
   end
 
   # Calls methods needed to perform calculations.
@@ -171,7 +172,7 @@ class PoorManPlatformerPhysics
   # Finds collisions between the bottom of the player's rect and the top of a world_collision_rect.
   def collision_floor!
     return unless state.dy <= 0 # return unless player is going down or is as far down as possible
-    player_rect = [state.x, state.y - 0.1, state.tile_size, state.tile_size] # definition of player
+    player_rect = [state.x, state.y - 0.1, state.char_size, state.char_size] # definition of player
 
     # Goes through world_collision_rects to find all intersections between the bottom of player's rect and
     # the top of a world_collision_rect (hence the "-0.1" above)
@@ -187,7 +188,7 @@ class PoorManPlatformerPhysics
   # Finds collisions between the player's left side and the right side of a world_collision_rect.
   def collision_left!
     return unless state.dx < 0 # return unless player is moving left
-    player_rect = [state.x - 0.1, state.y, state.tile_size, state.tile_size]
+    player_rect = [state.x - 0.1, state.y, state.char_size, state.char_size]
 
     # Goes through world_collision_rects to find all intersections beween the player's left side and the
     # right side of a world_collision_rect.
@@ -205,7 +206,7 @@ class PoorManPlatformerPhysics
   # Finds collisions between the right side of the player and the left side of a world_collision_rect.
   def collision_right!
     return unless state.dx > 0 # return unless player is moving right
-    player_rect = [state.x + 0.1, state.y, state.tile_size, state.tile_size]
+    player_rect = [state.x + 0.1, state.y, state.char_size, state.char_size]
 
     # Goes through world_collision_rects to find all intersections between the player's right side
     # and the left side of a world_collision_rect (hence the "+0.1" above)
@@ -217,14 +218,14 @@ class PoorManPlatformerPhysics
 
     # player's x is set to the value of the collided rect's left, minus the size of a rect
     # tile size is subtracted because player's position is denoted by bottom left corner
-    state.x = right_side_collisions[:left_right].left - state.tile_size
+    state.x = right_side_collisions[:left_right].left - state.char_size
     state.dx = 0 # player isn't moving right because its path is blocked
   end
 
   # Finds collisions between the top of the player's rect and the bottom of a world_collision_rect.
   def collision_ceiling!
     return unless state.dy > 0 # return unless player is moving up
-    player_rect = [state.x, state.y + 0.1, state.tile_size, state.tile_size]
+    player_rect = [state.x, state.y + 0.1, state.char_size, state.char_size]
 
     # Goes through world_collision_rects to find intersections between the bottom of a
     # world_collision_rect and the top of the player's rect (hence the "+0.1" above)
@@ -235,7 +236,7 @@ class PoorManPlatformerPhysics
     return unless ceil_collisions # return unless collision occurred
 
     # player's y is set to the bottom y of the rect it collided with, minus the size of a rect
-    state.y = ceil_collisions[:bottom].y - state.tile_size
+    state.y = ceil_collisions[:bottom].y - state.char_size
     state.dy = 0 # if a collision occurred, the player isn't moving up because its path is blocked
   end
 
@@ -250,14 +251,14 @@ class PoorManPlatformerPhysics
     #Ensures that the player doesn't go too high.
     # Position of player is denoted by bottom left hand corner, which is why we have to subtract the
     # size of the player's box (so it remains visible on the screen)
-    elsif state.y > 720 - state.tile_size # if the player's y position exceeds the height of screen
-      state.y = 720 - state.tile_size # the player will remain as high as possible while staying on screen
+    elsif state.y > 720 - state.char_size # if the player's y position exceeds the height of screen
+      state.y = 720 - state.char_size # the player will remain as high as possible while staying on screen
       state.dy = 0
     end
 
     # Ensures that the player remains in the horizontal range that it is supposed to.
-    if state.x >= 1280 - state.tile_size && state.dx > 0 # if player moves too far right
-      state.x = 1280 - state.tile_size # player will remain as right as possible while staying on screen
+    if state.x >= 1280 - state.char_size && state.dx > 0 # if player moves too far right
+      state.x = 1280 - state.char_size # player will remain as right as possible while staying on screen
       state.dx = 0
     elsif state.x <= 0 && state.dx < 0 # if player moves too far left
       state.x = 0 # player will remain as left as possible while remaining on screen
@@ -267,12 +268,14 @@ class PoorManPlatformerPhysics
 
   # Processes input from the user on the keyboard.
   def process_inputs
+    
+    #enable clicking for placing or destroying blocks
     if inputs.mouse.down
       state.world_lookup = {}
       x, y = to_coord inputs.mouse.down.point  # gets x, y coordinates for the grid --> Determines where boxes are placed
 
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
-        #state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
+        state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
         puts "Click Delete block at: x = #{x} y = #{y}"
       else
         state.world << [x, y] # If no duplicates, adds to world collection
