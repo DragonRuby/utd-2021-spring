@@ -1,36 +1,21 @@
 =begin
-
- APIs listing that haven't been encountered in previous sample apps:
-
- - first: Returns the first element of the array.
-   For example, if we have an array
-   numbers = [1, 2, 3, 4, 5]
-   and we call first by saying
-   numbers.first
-   the number 1 will be returned because it is the first element of the numbers array.
-
+ - numbers.first --> the number 1 will be returned because it is the first element of the numbers array. 
  - num1.idiv(num2): Divides two numbers and returns an integer.
    For example,
    16.idiv(3) = 5, because 16 / 3 is 5.33333 returned as an integer.
    16.idiv(4) = 4, because 16 / 4 is 4 and already has no decimal.
 
- Reminders:
-
+ Info:
  - find_all: Finds all values that satisfy specific requirements.
-
- - ARRAY#intersect_rect?: An array with at least four values is
-   considered a rect. The intersect_rect? function returns true
-   or false depending on if the two rectangles intersect.
-
+ - An array with at least four values is considered a rect. 
+ - The intersect_rect? function returns true or false depending on if the two rectangles intersect.
  - reject: Removes elements from a collection if they meet certain requirements.
-
 =end
 
-# This sample app allows users to create tiles and place them anywhere on the screen as obstacles.
-# The player can then move and maneuver around them.
 
-class PoorManPlatformerPhysics
+class Platform_Physics_And_Destruction
   attr_accessor :grid, :inputs, :state, :outputs
+
 
   # Calls all methods necessary for the app to run successfully.
   def tick
@@ -40,6 +25,7 @@ class PoorManPlatformerPhysics
     process_inputs
   end
 
+
   # Sets default values for variables.
   # The ||= sign means that the variable will only be set to the value following the = sign if the value has
   # not already been set before. Intialization happens only in the first frame.
@@ -47,6 +33,8 @@ class PoorManPlatformerPhysics
     state.tile_size               = 64
     state.gravity                 = -0.2
     state.char_size               = 56
+    state.max_horizontal_size     = 1280
+    state.max_vertical_size       = 720
     state.previous_tile_size    ||= state.tile_size
     state.x                     ||= 0
     state.y                     ||= 800
@@ -57,9 +45,9 @@ class PoorManPlatformerPhysics
     state.world_collision_rects ||= []
   end
 
+
   # Outputs solids and borders of different colors for the world and collision_rects collections.
   def render
-
     # Sets a black background on the screen (Comment this line out and the background will become white.)
     # Also note that black is the default color for when no color is assigned.
     #outputs.solids << grid.rect
@@ -91,15 +79,16 @@ class PoorManPlatformerPhysics
                         state.char_size,  0, 180, 0]
   end
 
+
   # Calls methods needed to perform calculations.
   def calc
     calc_world_lookup
     calc_player
   end
 
-  # Performs calculations on world_lookup and sets values.
-  def calc_world_lookup
 
+  # Performs calculations on world_lookup and sets values.
+  def calc_world_lookup 
     # If the tile size isn't equal to the previous tile size,
     # the previous tile size is set to the tile size,
     # and world_lookup hash is set to empty.
@@ -141,6 +130,7 @@ class PoorManPlatformerPhysics
           end
   end
 
+
   # Performs calculations to change the x and y values of the player's box.
   def calc_player
 
@@ -160,6 +150,7 @@ class PoorManPlatformerPhysics
     state.dx *= 0.8
   end
 
+
   # Calls methods needed to determine collisions between player and world_collision rects.
   def calc_box_collision
     return unless state.world_lookup.keys.length > 0 # return unless hash has atleast 1 key
@@ -168,6 +159,7 @@ class PoorManPlatformerPhysics
     collision_right!
     collision_ceiling!
   end
+
 
   # Finds collisions between the bottom of the player's rect and the top of a world_collision_rect.
   def collision_floor!
@@ -184,6 +176,7 @@ class PoorManPlatformerPhysics
     state.y = floor_collisions[:top].top # player's y is set to the y of the top of the collided rect
     state.dy = 0 # if a collision occurred, the player's rect isn't moving because its path is blocked
   end
+
 
   # Finds collisions between the player's left side and the right side of a world_collision_rect.
   def collision_left!
@@ -202,6 +195,7 @@ class PoorManPlatformerPhysics
     state.x = left_side_collisions[:left_right].right
     state.dx = 0 # player isn't moving left because its path is blocked
   end
+
 
   # Finds collisions between the right side of the player and the left side of a world_collision_rect.
   def collision_right!
@@ -222,6 +216,7 @@ class PoorManPlatformerPhysics
     state.dx = 0 # player isn't moving right because its path is blocked
   end
 
+
   # Finds collisions between the top of the player's rect and the bottom of a world_collision_rect.
   def collision_ceiling!
     return unless state.dy > 0 # return unless player is moving up
@@ -240,6 +235,7 @@ class PoorManPlatformerPhysics
     state.dy = 0 # if a collision occurred, the player isn't moving up because its path is blocked
   end
 
+
   # Makes sure the player remains within the screen's dimensions.
   def calc_edge_collision
 
@@ -251,14 +247,14 @@ class PoorManPlatformerPhysics
     #Ensures that the player doesn't go too high.
     # Position of player is denoted by bottom left hand corner, which is why we have to subtract the
     # size of the player's box (so it remains visible on the screen)
-    elsif state.y > 720 - state.char_size # if the player's y position exceeds the height of screen
-      state.y = 720 - state.char_size # the player will remain as high as possible while staying on screen
+    elsif state.y > state.max_vertical_size - state.char_size # if the player's y position exceeds the height of screen
+      state.y = state.max_vertical_size - state.char_size # the player will remain as high as possible while staying on screen
       state.dy = 0
     end
 
     # Ensures that the player remains in the horizontal range that it is supposed to.
-    if state.x >= 1280 - state.char_size && state.dx > 0 # if player moves too far right
-      state.x = 1280 - state.char_size # player will remain as right as possible while staying on screen
+    if state.x >= state.max_horizontal_size - state.char_size && state.dx > 0 # if player moves too far right
+      state.x = state.max_horizontal_size - state.char_size # player will remain as right as possible while staying on screen
       state.dx = 0
     elsif state.x <= 0 && state.dx < 0 # if player moves too far left
       state.x = 0 # player will remain as left as possible while remaining on screen
@@ -266,9 +262,9 @@ class PoorManPlatformerPhysics
     end
   end
 
+
   # Processes input from the user on the keyboard.
-  def process_inputs
-    
+  def process_inputs    
     #enable clicking for placing or destroying blocks
     if inputs.mouse.down
       state.world_lookup = {}
@@ -276,7 +272,6 @@ class PoorManPlatformerPhysics
 
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-        puts "Click Delete block at: x = #{x} y = #{y}"
       else
         state.world << [x, y] # If no duplicates, adds to world collection
       end
@@ -289,80 +284,82 @@ class PoorManPlatformerPhysics
       outputs.labels << [grid.left.shift_right(5), grid.top.shift_down(5), "x is #{gridx} and y is #{gridy}",0, 0, 255,   0,   0]
     end
 
-    #remove block above character  
-    if inputs.keyboard.key_down.w
+    #remove or place block above character  
+    if inputs.keyboard.key_down.up
       state.world_lookup = {}
       x, y = gridx,gridy+1  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-      else
+      elsif y < (state.max_vertical_size / 64)
         state.world << [x, y] # If no duplicates, adds to world collection
       end
     end
 
-    #remove block below character 
-    if inputs.keyboard.key_down.s
+    #remove or place block below character 
+    if inputs.keyboard.key_down.down
       state.world_lookup = {}
       x, y = gridx,gridy-1  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-      else
-        state.world << [x, y] # If no duplicates, adds to world collection
+      elsif y >= 0
+        state.world << [x, y] # If no duplicates, adds to world collection        
       end
     end
 
-    #remove block to the left of the character 
-    if inputs.keyboard.key_down.a
+    #remove or place block to the left of the character 
+    if inputs.keyboard.key_down.left
       state.world_lookup = {}
       x, y = gridx-1,gridy  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-      else
+      elsif x >= 0
         state.world << [x, y] # If no duplicates, adds to world collection
       end
     end
 
-    #remove block to the right of the character 
-    if inputs.keyboard.key_down.d
+    #remove or place block to the right of the character 
+    if inputs.keyboard.key_down.right
       state.world_lookup = {}
       x, y = gridx+1,gridy  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-      else
+      elsif x < (state.max_horizontal_size / 64)
         state.world << [x, y] # If no duplicates, adds to world collection
+        puts "Place block right at: x = #{x} y = #{y}"
       end
     end 
 
     # Sets dx to 0 if the player lets go of arrow keys.
-    if inputs.keyboard.key_up.right
+    if inputs.keyboard.key_up.d
       state.dx = 0
-    elsif inputs.keyboard.key_up.left
+    elsif inputs.keyboard.key_up.a
       state.dx = 0
     end
 
     # Sets dx to 3 in whatever direction the player chooses.
-    if inputs.keyboard.key_held.right # if right key is pressed
+    if inputs.keyboard.key_held.d # if d key is pressed
       state.dx =  3
-    elsif inputs.keyboard.key_held.left # if left key is pressed
+    elsif inputs.keyboard.key_held.a # if a key is pressed
       state.dx = -3
     end
 
     #Sets dy to 5 to make the player ~fly~ when they press the space bar
-    if inputs.keyboard.key_held.space
-      state.dy = 5
+    if inputs.keyboard.key_held.space || inputs.keyboard.key_held.w
+      state.dy = 3
     end
   end
 
-  def to_coord point
 
+  def to_coord point
     # Integer divides (idiv) point.x to turn into grid
     # Then, you can just multiply each integer by state.tile_size later so the grid coordinates.
     [point.x.idiv(state.tile_size), point.y.idiv(state.tile_size)]
   end
+
 
   # Represents the tolerance for a collision between the player's rect and another rect.
   def collision_tollerance
