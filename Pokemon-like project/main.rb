@@ -7,8 +7,8 @@ def tick args
   args.outputs.solids << [980, 0, 300, 200, 0, 0, 0, 255]
   args.outputs.solids << [990, 10, 280, 180, 255, 255, 255, 255]
   
-#args.outputs.sprites<< [200, 200, 200, 200, 'sprites/p1.png']#change the file name and path to change the character image
-  args.outputs.sprites<< [800, 500, 200, 180, 'sprites/p2.png']#change the file name and path to change the enemy image
+ #args.outputs.sprites<< [200, 200, 200, 200, 'sprites/p1.png']#change the file name and path to change the character image
+ #args.outputs.sprites<< [800, 500, 200, 180, 'sprites/p2.png']#change the file name and path to change the enemy image
   
   args.outputs.labels << [1100, 160, "ATTACK",    4]
   args.outputs.labels << [1100, 110, "DEFEND", 4]
@@ -36,6 +36,7 @@ def tick args
   args.state.selectitem||=0
   #animate cat
   looping_animation_cat args
+  looping_animation_jellyfish args
   
   if args.inputs.mouse.click
     args.state.last_mouse_click = args.inputs.mouse.click
@@ -88,6 +89,7 @@ def tick args
 		end
   end
 end
+
 #all the code after this line is copy from sample "\samples\02_input_basics\03_mouse_point_to_rect"
 def mylabel args, x, row, message
   [x, row_to_px(args, row), message, font]
@@ -115,11 +117,30 @@ def tick_instructions args, text, y = 715
   args.outputs.debug << [640, y - 25, "(click to dismiss instructions)" , -2, 1, 255, 255, 255].label
 end
 
+def looping_animation_jellyfish args
+#Continues to loop the jellyfish animation
+
+  # 1. When to start the animation.
+  start_looping_at = 0
+
+  # 2. The number of pngs that represent the full animation.
+  number_of_sprites = 8
+
+  # 3. How long to show each png.
+  number_of_frames_to_show_each_sprite = 4
+
+  # 4. Whether the animation should loop once, or forever.
+  does_sprite_loop = true
+
+  # Sprite index for jellyfish
+  sprite_index = start_looping_at.frame_index number_of_sprites, number_of_frames_to_show_each_sprite, does_sprite_loop
+
+  # Now that we have `sprite_index, we can present the correct file.
+  args.outputs.sprites << [800, 500, 200, 200, "sprites/jellyfish_sprite/jellyfish_#{sprite_index}.png"]
+end
+
 def looping_animation_cat args
-  # Here we define a few local variables that will be sent
-  # into the magic function that gives us the correct sprite image
-  # over time. There are four things we need in order to figure
-  # out which sprite to show.
+#Continues to loop the cat animation
 
   # 1. When to start the animation.
   start_looping_at = 0
@@ -128,15 +149,12 @@ def looping_animation_cat args
   number_of_sprites = 46
 
   # 3. How long to show each png.
-  number_of_frames_to_show_each_sprite = 2
+  number_of_frames_to_show_each_sprite = 3
 
   # 4. Whether the animation should loop once, or forever.
   does_sprite_loop = true
 
-  # With the variables defined above, we can get a number
-  # which represents the sprite to show by calling the `frame_index` function.
-  # In this case the number will be between 0, and 5 (you can see the sprites
-  # in the ./sprites directory).
+  # Sprite index for cat
   sprite_index = start_looping_at.frame_index number_of_sprites, number_of_frames_to_show_each_sprite, does_sprite_loop
 
   # Now that we have `sprite_index, we can present the correct file.
