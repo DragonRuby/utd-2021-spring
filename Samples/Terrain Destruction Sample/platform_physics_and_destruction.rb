@@ -43,6 +43,8 @@ class Platform_Physics_And_Destruction
     state.world                 ||= []
     state.world_lookup          ||= {}
     state.world_collision_rects ||= []
+    state.deletedLast           ||= false
+    state.deletedTimer          ||= 0
   end
 
 
@@ -61,18 +63,27 @@ class Platform_Physics_And_Destruction
         state.tile_size, 255, 255, 255]
     end
 
-    # The top, bottom, and sides of the borders for collision_rects are different colors.
-    outputs.borders << state.world_collision_rects.map do |e|
-      [
-        [e[:top],                             196, 98, 16], # top is a shade of green
-        [e[:bottom],                          196, 98, 16], # bottom is a shade of greenish-blue
-        [e[:left_right],                      196, 98, 16], # left and right are a shade of red
-      ]
+    #Debug output --> Seems issue is that last block is stored in a hash along with the player obj in the collision rects
+    if state.deletedLast
+      for index in state.world_collision_rects.map
+        puts "state.world_collision_rects.map = #{index}"        
+      end 
+      if state.deletedTimer > 0
+        state.deletedTimer -= 1
+      end
+    elsif state.deletedTimer == 0
+      #Sets border colors for collision_rects
+      outputs.borders << state.world_collision_rects.map do |e|
+        [
+          [e[:top],                             196, 98, 16], # top is a shade of green
+          [e[:bottom],                          196, 98, 16], # bottom is a shade of greenish-blue
+          [e[:left_right],                      196, 98, 16], # left and right are a shade of red
+        ]
+      end
     end
 
-    # Sets the position, size, and color (a shade of green) of the borders of only the player's
-    # box and outputs it. If you change the 180 to 0, the player's box will be black and you
-    # won't be able to see it (because it will match the black background).
+    
+    # Sets the position, size, and color of the borders of only the player's box and outputs it. 
     outputs.solids << [state.x,
                         state.y,
                         state.char_size,
@@ -238,7 +249,6 @@ class Platform_Physics_And_Destruction
 
   # Makes sure the player remains within the screen's dimensions.
   def calc_edge_collision
-
     #Ensures that the player doesn't fall below the map.
     if state.y < 0
       state.y = 0
@@ -265,71 +275,95 @@ class Platform_Physics_And_Destruction
 
   # Processes input from the user on the keyboard.
   def process_inputs    
-    #enable clicking for placing or destroying blocks
-    if inputs.mouse.down
-      state.world_lookup = {}
-      x, y = to_coord inputs.mouse.down.point  # gets x, y coordinates for the grid --> Determines where boxes are placed
-
-      if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
-        state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-      else
-        state.world << [x, y] # If no duplicates, adds to world collection
-      end
-    end
-
-    #display current player position
+    #display current player position - DEBUG
     gridx = ((state.x)/64).round
     gridy = ((state.y)/64).round
     if inputs.keyboard.key_held.r
       outputs.labels << [grid.left.shift_right(5), grid.top.shift_down(5), "x is #{gridx} and y is #{gridy}",0, 0, 255,   0,   0]
     end
 
+    #enable clicking for placing or destroying blocks - DEBUG
+    if inputs.mouse.down
+      state.world_lookup = {}
+      x, y = to_coord inputs.mouse.down.point  # gets x, y coordinates for the grid --> Determines where boxes are placed
+
+      if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
+        state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
+        if state.world == []
+          state.deletedLast = true;
+          state.deletedTimer = 15
+        end
+      else
+        state.world << [x, y] # If no duplicates, adds to world collection
+        state.deletedLast = false;
+      end
+    end
+
     #remove or place block above character  
     if inputs.keyboard.key_down.up
       state.world_lookup = {}
-      x, y = gridx,gridy+1  # gets x, y coordinates for the grid      
+      x, y = gridx, gridy+1  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
+        if state.world == []
+          state.deletedLast = true;
+          state.deletedTimer = 15
+        end
       elsif y < (state.max_vertical_size / 64)
         state.world << [x, y] # If no duplicates, adds to world collection
+        state.deletedLast = false;
       end
     end
 
     #remove or place block below character 
     if inputs.keyboard.key_down.down
       state.world_lookup = {}
-      x, y = gridx,gridy-1  # gets x, y coordinates for the grid      
+      x, y = gridx, gridy-1  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
+        if state.world == []
+          state.deletedLast = true;
+          state.deletedTimer = 15
+        end
       elsif y >= 0
-        state.world << [x, y] # If no duplicates, adds to world collection        
+        state.world << [x, y] # If no duplicates, adds to world collection     
+        state.deletedLast = false;   
       end
     end
 
     #remove or place block to the left of the character 
     if inputs.keyboard.key_down.left
       state.world_lookup = {}
-      x, y = gridx-1,gridy  # gets x, y coordinates for the grid      
+      x, y = gridx-1, gridy  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
+        if state.world == []
+          state.deletedLast = true;
+          state.deletedTimer = 15
+        end
       elsif x >= 0
         state.world << [x, y] # If no duplicates, adds to world collection
+        state.deletedLast = false;
       end
     end
 
     #remove or place block to the right of the character 
     if inputs.keyboard.key_down.right
       state.world_lookup = {}
-      x, y = gridx+1,gridy  # gets x, y coordinates for the grid      
+      x, y = gridx+1, gridy  # gets x, y coordinates for the grid      
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
+        if state.world == []
+          state.deletedLast = true;
+          state.deletedTimer = 15
+        end
       elsif x < (state.max_horizontal_size / 64)
         state.world << [x, y] # If no duplicates, adds to world collection
-        puts "Place block right at: x = #{x} y = #{y}"
+        state.deletedLast = false;
       end
     end 
 
