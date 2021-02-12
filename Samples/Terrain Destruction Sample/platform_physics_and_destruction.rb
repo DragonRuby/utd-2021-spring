@@ -29,9 +29,9 @@ class Platform_Physics_And_Destruction
   # The ||= sign means that the variable will only be set to the value following the = sign if the value has
   # not already been set before. Intialization happens only in the first frame.
   def defaults
-    state.red                     =140
-    state.green                     =70
-    state.blue                     =30
+    state.red                     = 140
+    state.green                   = 70
+    state.blue                    = 30
     state.tile_size               = 64
     state.gravity                 = -0.2
     state.char_size               = 56

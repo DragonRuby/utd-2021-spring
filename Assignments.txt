@@ -23,5 +23,7 @@ Week 2:
             Use mouse based destruction 
         -Pyro implement controller 
         -Can use MIT or Creative Commons Liscence Stuff but will be replaced 
+            -$200 per team for art 
         -Watch https://www.infoq.com/presentations/Simple-Made-Easy/ 
         -Gravity/Jumping --> compare to Terraria
+        -Add lots of stuff in GitHub Issues --> Lessons learn(args.state, etc.), What we are working on next week, etc. 
