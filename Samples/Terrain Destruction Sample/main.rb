@@ -25,7 +25,7 @@ def tick args
 
     args.outputs.debug << [0, y - 75, 1280, 85].solid
     args.outputs.debug << [640, y, text, 1, 1, 255, 255, 255].label
-    args.outputs.debug << [640, y - 25, "ARROW keys to move around. SPACE to jump." , -2, 1, 255, 255, 255].label
-    args.outputs.debug << [640, y - 50, "Debug: W,A,S,D or CLICK to place or remove a box" , -2, 1, 255, 255, 255].label
+    args.outputs.debug << [640, y - 25, "W,A,S,D keys to move around. SPACE to jump." , -2, 1, 255, 255, 255].label
+    args.outputs.debug << [640, y - 50, "Debug: ARROW keys or CLICK to place or remove a box" , -2, 1, 255, 255, 255].label
   end
 end
