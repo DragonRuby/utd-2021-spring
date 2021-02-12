@@ -43,8 +43,6 @@ class Platform_Physics_And_Destruction
     state.world                 ||= []
     state.world_lookup          ||= {}
     state.world_collision_rects ||= []
-    state.deletedLast           ||= false
-    state.deletedTimer          ||= 0
   end
 
 
@@ -56,32 +54,12 @@ class Platform_Physics_And_Destruction
 
     # The position, size, and color (white) are set for borders given to the world collection.
     # Try changing the color by assigning different numbers (between 0 and 255) to the last three parameters.
-    outputs.borders << state.world.map do |x, y|
-      [x * state.tile_size,
+    outputs.solids << state.world.map do |x, y|
+      [ x * state.tile_size,
         y * state.tile_size,
         state.tile_size,
-        state.tile_size, 255, 255, 255]
+        state.tile_size, 196, 98, 16]
     end
-
-    #Debug output --> Seems issue is that last block is stored in a hash along with the player obj in the collision rects
-    if state.deletedLast
-      for index in state.world_collision_rects.map
-        puts "state.world_collision_rects.map = #{index}"        
-      end 
-      if state.deletedTimer > 0
-        state.deletedTimer -= 1
-      end
-    elsif state.deletedTimer == 0
-      #Sets border colors for collision_rects
-      outputs.borders << state.world_collision_rects.map do |e|
-        [
-          [e[:top],                             196, 98, 16], # top is a shade of green
-          [e[:bottom],                          196, 98, 16], # bottom is a shade of greenish-blue
-          [e[:left_right],                      196, 98, 16], # left and right are a shade of red
-        ]
-      end
-    end
-
     
     # Sets the position, size, and color of the borders of only the player's box and outputs it. 
     outputs.solids << [state.x,
@@ -289,10 +267,6 @@ class Platform_Physics_And_Destruction
 
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-        if state.world == []
-          state.deletedLast = true;
-          state.deletedTimer = 15
-        end
       else
         state.world << [x, y] # If no duplicates, adds to world collection
         state.deletedLast = false;
@@ -306,10 +280,6 @@ class Platform_Physics_And_Destruction
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-        if state.world == []
-          state.deletedLast = true;
-          state.deletedTimer = 15
-        end
       elsif y < (state.max_vertical_size / 64)
         state.world << [x, y] # If no duplicates, adds to world collection
         state.deletedLast = false;
@@ -323,10 +293,6 @@ class Platform_Physics_And_Destruction
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-        if state.world == []
-          state.deletedLast = true;
-          state.deletedTimer = 15
-        end
       elsif y >= 0
         state.world << [x, y] # If no duplicates, adds to world collection     
         state.deletedLast = false;   
@@ -340,10 +306,6 @@ class Platform_Physics_And_Destruction
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-        if state.world == []
-          state.deletedLast = true;
-          state.deletedTimer = 15
-        end
       elsif x >= 0
         state.world << [x, y] # If no duplicates, adds to world collection
         state.deletedLast = false;
@@ -357,10 +319,6 @@ class Platform_Physics_And_Destruction
       
       if state.world.any? { |loc| loc == [x, y] }  # checks if coordinates duplicate
         state.world = state.world.reject { |loc| loc == [x, y] }  # erases tile space
-        if state.world == []
-          state.deletedLast = true;
-          state.deletedTimer = 15
-        end
       elsif x < (state.max_horizontal_size / 64)
         state.world << [x, y] # If no duplicates, adds to world collection
         state.deletedLast = false;
