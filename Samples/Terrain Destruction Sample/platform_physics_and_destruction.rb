@@ -4,7 +4,6 @@
    For example,
    16.idiv(3) = 5, because 16 / 3 is 5.33333 returned as an integer.
    16.idiv(4) = 4, because 16 / 4 is 4 and already has no decimal.
-
  Info:
  - find_all: Finds all values that satisfy specific requirements.
  - An array with at least four values is considered a rect. 
@@ -30,6 +29,9 @@ class Platform_Physics_And_Destruction
   # The ||= sign means that the variable will only be set to the value following the = sign if the value has
   # not already been set before. Intialization happens only in the first frame.
   def defaults
+    state.red                     =140
+    state.green                     =70
+    state.blue                     =30
     state.tile_size               = 64
     state.gravity                 = -0.2
     state.char_size               = 56
@@ -58,7 +60,7 @@ class Platform_Physics_And_Destruction
       [ x * state.tile_size,
         y * state.tile_size,
         state.tile_size,
-        state.tile_size, 196, 98, 16]
+        state.tile_size, state.red, state.green, state.blue]
     end
     
     # Sets the position, size, and color of the borders of only the player's box and outputs it. 
@@ -260,6 +262,33 @@ class Platform_Physics_And_Destruction
       outputs.labels << [grid.left.shift_right(5), grid.top.shift_down(5), "x is #{gridx} and y is #{gridy}",0, 0, 255,   0,   0]
     end
 
+
+    if state.tick_count > 3
+    state.red = 200
+    state.green = 200
+    state.blue =200
+    end
+
+    i = 0
+    j = 0
+    if state.tick_count == 2
+    while j < 6 do 
+    while  i < 20 do
+      if j == 5 then
+        state.red = 0
+        state.green = 200
+        state.blue = 0
+      end
+
+      state.world << [i, j]
+      i = i + 1
+    end
+
+    i=0
+    j = j + 1  
+    end  
+    end
+
     #enable clicking for placing or destroying blocks - DEBUG
     if inputs.mouse.down
       state.world_lookup = {}
@@ -332,6 +361,7 @@ class Platform_Physics_And_Destruction
       state.dx = 0
     end
 
+    # Sets dx to 3 in whatever direction the player chooses.
     # Sets dx to 3 in whatever direction the player chooses.
     if inputs.keyboard.key_held.d # if d key is pressed
       state.dx =  3
