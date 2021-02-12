@@ -15,3 +15,13 @@ Week 1 Teams:
     Also:
     Create GitHub issues for each, and a directory with your code in it (one directory for each sample)
     Make a screenshot that shows what you think the task is
+
+Week 2:
+    Terrain Destruction Sample:
+        -Work on collision based on physics ver 3
+        -Work on mining --> identitcal mining to Terreria
+            Use mouse based destruction 
+        -Pyro implement controller 
+        -Can use MIT or Creative Commons Liscence Stuff but will be replaced 
+        -Watch https://www.infoq.com/presentations/Simple-Made-Easy/ 
+        -Gravity/Jumping --> compare to Terraria
