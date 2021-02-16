@@ -29,9 +29,9 @@ class Platform_Physics_And_Destruction
   # The ||= sign means that the variable will only be set to the value following the = sign if the value has
   # not already been set before. Intialization happens only in the first frame.
   def defaults
-    state.red                     = 140
-    state.green                   = 70
-    state.blue                    = 30
+    state.red                     =140
+    state.green                   =70
+    state.blue                    =30
     state.tile_size               = 64
     state.gravity                 = -0.2
     state.char_size               = 56
@@ -47,6 +47,7 @@ class Platform_Physics_And_Destruction
     state.world_collision_rects ||= []
   end
 
+    
 
   # Outputs solids and borders of different colors for the world and collision_rects collections.
   def render
@@ -56,11 +57,12 @@ class Platform_Physics_And_Destruction
 
     # The position, size, and color (white) are set for borders given to the world collection.
     # Try changing the color by assigning different numbers (between 0 and 255) to the last three parameters.
-    outputs.solids << state.world.map do |x, y|
-      [ x * state.tile_size,
-        y * state.tile_size,
-        state.tile_size,
-        state.tile_size, state.red, state.green, state.blue]
+
+    outputs.sprites << state.world.map do |x, y| 
+      [x * state.tile_size, 
+       y * state.tile_size, 
+       state.tile_size, 
+       state.tile_size, "sprites/block.png"]
     end
     
     # Sets the position, size, and color of the borders of only the player's box and outputs it. 
@@ -271,7 +273,7 @@ class Platform_Physics_And_Destruction
 
     i = 0
     j = 0
-    if state.tick_count == 2
+    if state.tick_count == 1
     while j < 6 do 
     while  i < 20 do
       if j == 5 then
@@ -279,8 +281,9 @@ class Platform_Physics_And_Destruction
         state.green = 200
         state.blue = 0
       end
-
-      state.world << [i, j]
+      
+      #draw ground sprite
+      state.world << outputs.sprites << [i, j, state.tile_size, state.tile_size, "sprites/block.png"]
       i = i + 1
     end
 
