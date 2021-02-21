@@ -1,0 +1,9 @@
+Based on Darkest Dungeon
+Use sample: 
+    crafting for inventory system
+    Mouse: 1, 2, 3
+    Input Basics: Mouse stuff
+    Easing - Watch this: https://www.youtube.com/watch?v=mr5xkf6zSzk
+Use sprites inside of base dir 
+Make it resemble DD inventory system based on layout and function 
+Alpha transition dialog box using a button
