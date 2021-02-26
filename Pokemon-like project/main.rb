@@ -22,7 +22,7 @@ def tick args
   item1box = [40, 130, 100, 40, 0, 0, 170]
   item2box = [40, 80, 100, 40, 0, 0, 170]
   item3box = [40, 30, 100, 40, 0, 0, 170]
-  
+
 case args.state.button
   when 0
   args.outputs.borders << attackbox
@@ -43,6 +43,7 @@ end
   when 1
   args.outputs.borders << [490, 360, 280, 40]
   args.outputs.labels << mylabel(args, 500, 16, "You attacked the enemy")
+  opponent_turn args
   
   when 2
   args.outputs.borders << [490, 360, 220, 40]
@@ -250,5 +251,22 @@ def looping_animation_cat args
   args.outputs.sprites << [200, 200, 200, 200, "sprites/cat_sprite/Cat_#{sprite_index}.png"]
 end
 
+def opponent_turn args
+	args.outputs.labels << [580, 350, "Continue",    2]
+	
+	continue_button = [575, 320, 100, 40, 0, 0, 170]
+	case args.state.button
+		when 0
+			args.outputs.borders << continue_button
+	end
+  #continue button
+  
+  # render the button
+  args.outputs.borders << args.state.continue_button.border
+  args.outputs.labels << args.state.continue_button.label
 
-
+  # determine if the button has been clicked
+  if (args.inputs.mouse.click) && (args.inputs.mouse.point.inside_rect? args.state.continue_button.order)
+		args.outputs.labels << mylabel(args, 580, 350, "Opponent has attacked")
+  end
+end
