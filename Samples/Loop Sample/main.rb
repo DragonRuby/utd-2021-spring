@@ -1,62 +1,4 @@
-=begin
 
- APIs listing that haven't been encountered in previous sample apps:
-
- - Hashes: Collection of unique keys and their corresponding values. The value can be found
-   using their keys.
-
-   For example, if we have a "numbers" hash that stores numbers in English as the
-   key and numbers in Spanish as the value, we'd have a hash that looks like this...
-   numbers = { "one" => "uno", "two" => "dos", "three" => "tres" }
-   and on it goes.
-
-   Now if we wanted to find the corresponding value of the "one" key, we could say
-   puts numbers["one"]
-   which would print "uno" to the console.
-
- - num1.greater(num2): Returns the greater value.
-   For example, if we have the command
-   puts 4.greater(3)
-   the number 4 would be printed to the console since it has a greater value than 3.
-   Similar to lesser, which returns the lesser value.
-
- - num1.lesser(num2): Finds the lower value of the given options.
-   For example, in the statement
-   a = 4.lesser(3)
-   3 has a lower value than 4, which means that the value of a would be set to 3,
-   but if the statement had been
-   a = 4.lesser(5)
-   4 has a lower value than 5, which means that the value of a would be set to 4.
-
- - reject: Removes elements from a collection if they meet certain requirements.
-   For example, you can derive an array of odd numbers from an original array of
-   numbers 1 through 10 by rejecting all elements that are even (or divisible by 2).
-
- - find_all: Finds all values that satisfy specific requirements.
-   For example, you can find all elements of a collection that are divisible by 2
-   or find all objects that have intersected with another object.
-
- - abs: Returns the absolute value.
-   For example, the command
-   (-30).abs
-   would return 30 as a result.
-
- - map: Ruby method used to transform data; used in arrays, hashes, and collections.
-   Can be used to perform an action on every element of a collection, such as multiplying
-   each element by 2 or declaring every element as a new entity.
-
- Reminders:
-
- - args.inputs.keyboard.KEY: Determines if a key has been pressed.
-   For more information about the keyboard, take a look at mygame/documentation/06-keyboard.md.
-
- - ARRAY#intersect_rect?: Returns true or false depending on if the two rectangles intersect.
-
- - args.outputs.solids: An array. The values generate a solid.
-   The parameters are [X, Y, WIDTH, HEIGHT, RED, GREEN, BLUE]
-   For more information about solids, go to mygame/documentation/03-solids-and-borders.md.
-
-=end
 
 # Calls methods needed for game to run properly
 def tick args
@@ -80,24 +22,30 @@ def defaults args
   args.state.player.h  ||= 64
   args.state.player.dy ||= 0
   args.state.player.dx ||= 0
+  args.state.player.r  ||= 0
   args.state.game_over_at ||= 0
   args.state.loopy.x   ||= 200
   args.state.loopy.y   ||= 0
   args.state.loopy.h   ||= 400
   args.state.loopy.k   ||= 400
   args.state.loopy.r   ||= 200
+  args.state.loopy.hide||= 128
+  args.state.tickstart ||= 0
+  args.state.inloop    ||= false
+  args.state.looptime  ||= 120
+
   
 end
 
 # sets enemy, player, hammer values
 def fiddle args
-  args.state.gravity                     = 0.0
+  args.state.gravity                     = -0.3
   args.state.player_jump_power           = 10       # sets player values
   args.state.player_jump_power_duration  = 10
   args.state.player_max_run_speed        = 10
   args.state.player_speed_slowdown_rate  = 0.9
   args.state.player_acceleration         = 1
-  args.state.loopy.angle  ||= 0
+  args.state.loopy.angle  ||= Math::PI * 1.5
 end
 
 # outputs objects onto the screen
@@ -107,19 +55,59 @@ def render args
     # subtracts 64 from bridge_top because position is denoted by bottom left corner
     [i * 64, args.state.bridge_top - 64, 64, 64]
   end
-  args.state.loopy.angle = ((2*Math::PI)/100) + args.state.loopy.angle
-  if (args.state.loopy.angle > 2*Math::PI)
+  args.state.loopy.angle = ((2*Math::PI)/args.state.looptime) + args.state.loopy.angle #dictates how quickly the angle changes
+  if (args.state.loopy.angle > 2*Math::PI)#keeps angle between 0-360
     args.state.loopy.angle = 0
   end
-  args.outputs.solids << [args.state.x, args.state.y, args.state.w, args.state.h, 255, 0, 0]
-  args.outputs.solids << [args.state.player.x, args.state.player.y, args.state.player.w, args.state.player.h, 255, 0, 0] # outputs player onto screen (red box)
-  args.outputs.labels << [10, 35.from_top, "  #{Math.cos(args.state.loopy.angle)}"] # test value 
-  args.outputs.solids << [(Math.cos(args.state.loopy.angle)*args.state.loopy.r)+400,(Math.sin(args.state.loopy.angle)*args.state.loopy.r)+400 , 64, 64, 255, 0, 0]
+
+  #sprites
+  loopstart =  [463, args.state.loopy.hide,    64,     64, "sprites/square/gray.png",    0, 0]
+  player = [args.state.player.x, args.state.player.y, args.state.player.w, args.state.player.h, "sprites/circle/blue.png", args.state.player.r]
+  
+  if (player.rect.intersect_rect? loopstart) && (args.state.player.dx > 7)  && (args.state.tick_count > args.state.tickstart + args.state.looptime+20) #loop start
+  args.state.tickstart = args.state.tick_count
+  args.state.inloop = true
+  args.state.loopy.hide = 0
+  args.state.loopy.angle  = Math::PI * 1.5
+  end
+  
+  if args.state.tick_count > args.state.tickstart + args.state.looptime + 20 #allows for multiple loops
+  args.state.tickstart = 0
+  end
+
+  if args.state.inloop #in loop
+  if args.state.tick_count < args.state.tickstart + args.state.looptime
+  args.state.player.x = (Math.cos(args.state.loopy.angle)*args.state.loopy.r)+400
+  args.state.player.y = (Math.sin(args.state.loopy.angle)*args.state.loopy.r)+328 
+  args.state.player.r = ((args.state.tick_count-args.state.tickstart) % 360*(360/args.state.looptime))
+  else 
+  args.state.inloop = false
+  args.state.loopy.hide = 128
+  args.state.player.r  = 0
+  end
+  end
+  
+
+  
+
+  
+  args.outputs.labels << [10, 35.from_top, "  #{args.state.tick_count}"] # test value 
+  args.outputs.labels << [10, 50.from_top, "  #{args.state.tickstart}"] # test value 
+  args.outputs.sprites << [(Math.cos(args.state.loopy.angle)*args.state.loopy.r)+400,(Math.sin(args.state.loopy.angle)*args.state.loopy.r)+328 , 64, 64, "sprites/square/gray.png", 90+(args.state.tick_count % 360*2), 0]
+
+  #spriterender
+  
+  args.outputs.sprites << loopstart
+  args.outputs.sprites << player
+
+
 end
 
 # Performs calculations to move objects on the screen
 def calc args
 
+if !args.state.inloop
+args.state.tick_count < args.state.tickstart + 180
   # Since velocity is the change in position, the change in x increases by dx. Same with y and dy.
   args.state.player.x  += args.state.player.dx
   args.state.player.y  += args.state.player.dy
@@ -138,7 +126,9 @@ def calc args
 
   # player is not falling if it is located on the top of the bridge
   args.state.player.falling = false if args.state.player.y == args.state.bridge_top
-  args.state.player.rect = [args.state.player.x, args.state.player.y, args.state.player.h, args.state.player.w] # sets definition for player
+  #args.state.player.rect = [args.state.player.x, args.state.player.y, args.state.player.h, args.state.player.w] # sets definition for player
+
+  end
   end
 
   
