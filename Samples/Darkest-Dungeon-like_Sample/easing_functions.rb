@@ -1,7 +1,8 @@
-def easeIt args, start_val, end_val, start_time
+def easeIt state, start_val, end_val, start_time, duration=0.5, anim_type=[:quint]
   # define start time and duration of animation
-  args.state.start_animate_at = start_time 
-  args.state.duration = 30 
+  state.start_animate_at = start_time 
+  state.duration = duration.seconds
+  state.animation_type = anim_type #choose animation type
 
   # define type of animations
   # :identity, :quad, :cube, :quart, :quint, :flip
@@ -26,19 +27,11 @@ def easeIt args, start_val, end_val, start_time
   # [:smoothest_start]
   # [:smoothest_stop] 
   
-  #choose animation type
-  args.state.animation_type = [:quint]
-
   # Numeric#ease
-  progress = args.state.start_animate_at.ease(args.state.duration, args.state.animation_type)
+  progress = state.start_animate_at.ease(state.duration, state.animation_type)
 
-  # Numeric#ease needs to called:
-  # 1. On the number that represents the point in time you want to start, and takes two parameters:
-  #   a. The first parameter is how long the animation should take.
-  #   b. The second parameter represents the functions that need to be called.
-  #
-  # For example, if I wanted an animate to start 3 seconds in, and last for 10 seconds,
-  # and I want to animation to start fast and end slow, I would do:
+  # Ex: animate to start 3 seconds in, and last for 10 seconds,
+  # and want animation to start fast and end slow then do:
   # (60 * 3).ease(60 * 10, :flip, :quint, :flip)
 
   #calculate current value
@@ -46,6 +39,22 @@ def easeIt args, start_val, end_val, start_time
   
   return calc_val
 end
+
+
+def easeSpline state, outputs, duration
+  state.duration_spline = duration.seconds
+  state.spline = [
+    [0.0, 0.33, 0.66, 1.0],
+    [1.0, 1.33, 1.66, 2.0],
+    [2.0, 2.33, 2.66, 3.0],
+    [3.0, 3.33, 3.66, 4.0],
+  ]
+
+  state.simulation_tick = state.tick_count % state.duration_spline
+  progress = 0.ease_spline_extended state.simulation_tick, state.duration_spline, state.spline
+  
+  return progress
+end 
 
 
 # you can make own variations of animations using this
