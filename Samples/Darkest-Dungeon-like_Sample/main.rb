@@ -66,7 +66,7 @@ class DungeonHandler
         if !state.items
         state.items = [
             {
-            id: :torch, # :orange is a Symbol, this is better than using "orange" for the id
+            id: :torch, 
             quantity: 3,
             path: 'sprites/added/torch.png',
             location: :inventory,
@@ -240,9 +240,6 @@ class DungeonHandler
     def renderInteract alpha
         outputs.sprites << [state.interact_border.x-30, state.interact_border.y-50, 380, 330, "sprites/added/Interact_UI.png", 0, alpha]
 
-        #[ X ,  Y,    TEXT,   SIZE, ALIGN, RED, GREEN, BLUE, ALPHA, FONT STYLE]
-        #outputs.labels << [state.interact_border.x+160, state.interact_border.y+240, "Interaction", 3, 1, 0, 0, 0, alpha]
-
         # for each interact spot, create a sprite
         outputs.primitives << state.interact_area.map do |a|
             { x: a.x, y: a.y, w: a.w, h: a.h, path: 'sprites/square/white.png', a: alpha }
@@ -274,20 +271,12 @@ class DungeonHandler
     def render_background
         outputs.sprites << [0, 0, 1280, 720, 'sprites/added/background03.png']
 
-=begin
-        0    - (1280 * easeSpline).*.30 % 1280 --> once it reaches -1280 Need to set to 0    --> Once hit 1.0 go to 0.0 in spline
-        1280 - (1280 * easeSpline).*.30 % 1280 --> once it reaches     0 Need to set to 1280 --> Once hit 1.0 go to 0.0 in spline
-        Duration affects positioning???
-        Need Scroll Point per image to avoid jarring reset at same time 
-=end
-
         #scroll_point_at = state.tick_count
         scroll_point_at ||= 0
         scroll_point_at = 1280 * (easeSpline state, outputs, 30)
 
         outputs.sprites << scrolling_background(scroll_point_at, 'sprites/added/parallax_back03.png', 0.30)
         outputs.sprites << scrolling_background(scroll_point_at, 'sprites/added/parallax_mid03.png', 0.50)
-        #outputs.sprites << scrolling_background(scroll_point_at, 'sprites/added/parallax_front02.png',  1.00, -80)
     end
 
 
@@ -665,8 +654,8 @@ def render_and_zoom dungeon, state, outputs, x_shift, y_shift, w_shift, h_shift,
     elsif state.rejected
         outputs.sprites << [easeIt(state, 0,    state.offsetX,    click_time, state.cameraShakeDuration), 
                             easeIt(state, 0,    state.offsetY,    click_time, state.cameraShakeDuration), 
-                            1280, #easeIt(state, 1280, w_shift,          click_time, state.cameraShakeDuration), 
-                            720, #easeIt(state, 720,  h_shift,          click_time, state.cameraShakeDuration), 
+                            1280,
+                            720,  
                             dungeon,
                             state.shakyCamera.angle] #camera shake
         state.firstStart = true
@@ -681,8 +670,8 @@ def render_and_zoom dungeon, state, outputs, x_shift, y_shift, w_shift, h_shift,
     elsif state.start && state.firstStart && state.lastClicked == "rejected"
         outputs.sprites << [easeIt(state, state.offsetX, 0,    click_time, state.cameraShakeDuration), 
                             easeIt(state, state.offsetY, 0,    click_time, state.cameraShakeDuration), 
-                            1280, #easeIt(state, w_shift, 1280,       click_time, state.cameraShakeDuration), 
-                            720, #easeIt(state, h_shift, 720,        click_time, state.cameraShakeDuration), 
+                            1280, 
+                            720, 
                             dungeon,
                             state.shakyCamera.angle] #camera shake
     else 

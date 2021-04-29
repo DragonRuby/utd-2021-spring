@@ -3,36 +3,9 @@ def easeIt state, start_val, end_val, start_time, duration=0.5, anim_type=[:quin
   state.start_animate_at = start_time 
   state.duration = duration.seconds
   state.animation_type = anim_type #choose animation type
-
-  # define type of animations
-  # :identity, :quad, :cube, :quart, :quint, :flip
-
-  # Linear is defined as:
-  # [:identity]
-  
-  # Smooth start variations are:
-  # [:quad]
-  # [:cube]
-  # [:quart]
-  # [:quint]
-
-  # Linear reversed, and smooth stop are the same as the animations defined above, but reversed:
-  # [:flip, :identity]
-  # [:flip, :quad, :flip]
-  # [:flip, :cube, :flip]
-  # [:flip, :quart, :flip]
-  # [:flip, :quint, :flip]
-
-  #custom definitions
-  # [:smoothest_start]
-  # [:smoothest_stop] 
   
   # Numeric#ease
   progress = state.start_animate_at.ease(state.duration, state.animation_type)
-
-  # Ex: animate to start 3 seconds in, and last for 10 seconds,
-  # and want animation to start fast and end slow then do:
-  # (60 * 3).ease(60 * 10, :flip, :quint, :flip)
 
   #calculate current value
   calc_val = start_val + (end_val - start_val) * progress
