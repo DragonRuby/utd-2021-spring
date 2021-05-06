@@ -26,10 +26,10 @@ class DungeonHandler
         state.inventory_border.w  = state.sprite_size * 8
         state.inventory_border.h  = state.sprite_size * 2
         state.inventory_border.x  = 600
-        state.inventory_border.y  = 200 - state.inventory_border.h
+        state.inventory_border.y  = 700 - state.inventory_border.h
 
-        state.interact_border.x = 760
-        state.interact_border.y = 350
+        state.interact_border.x = 500
+        state.interact_border.y = 220
         
         state.interact.accept.x = state.interact_border.x + 60
         state.interact.accept.y = state.interact_border.y - 20 
@@ -49,9 +49,6 @@ class DungeonHandler
         state.interact.reject.rect ||= [state.interact.reject.x, state.interact.reject.y, state.interact.accept_reject_w_h, state.interact.accept_reject_w_h]
         state.interact.start.rect  ||= [state.interact.start.x,  state.interact.start.y,  state.interact.start.w,  state.interact.start.h]
         
-        state.rejected ||= false
-        state.accepted ||= false
-        state.start    ||= false
         state.checked_interact_items ||= false 
         state.render_fire_interact ||= false 
         state.render_fire_interact_end ||= false
@@ -60,24 +57,41 @@ class DungeonHandler
         state.interact_items_accepted ||= []
         state.held_item_last_loc ||= :inventory
 
-        state.lastClicked ||= "None"
+        state.cur_state  ||= "None"
+        state.last_state ||= "None"
+
+        state.sprite_sheet ||= 0
 
         # initialize items for the first time if they are nil
         if !state.items
         state.items = [
             {
-            id: :torch, 
-            quantity: 3,
-            path: 'sprites/added/torch.png',
-            location: :inventory,
-            ordinal_x: 0, ordinal_y: 0
+                id: :torch, 
+                quantity: 3,
+                path: 'sprites/added/Icons/Weapon & Tool/torch.png',
+                location: :inventory,
+                ordinal_x: 0, ordinal_y: 0
             },
             {
-            id: :gold_coin,
-            quantity: 10,
-            path: 'sprites/added/gold_coin.png',
-            location: :inventory,
-            ordinal_x: 1, ordinal_y: 0
+                id: :copper_coin,
+                quantity: 10,
+                path: 'sprites/added/Icons/Misc/Copper Coin.png',
+                location: :inventory,
+                ordinal_x: 1, ordinal_y: 0
+            },
+            {
+                id: :health_potion,
+                quantity: 5,
+                path: 'sprites/added/Icons/Potion/Red Potion.png',
+                location: :inventory,
+                ordinal_x: 2, ordinal_y: 0
+            },
+            {
+                id: :mana_potion,
+                quantity: 5,
+                path: 'sprites/added/Icons/Potion/Blue Potion 3.png',
+                location: :inventory,
+                ordinal_x: 3, ordinal_y: 0
             },
         ]
 
@@ -130,23 +144,26 @@ class DungeonHandler
         render_background
 
         #render characters
-        state.jester.name = "jester"
-        state.skeleton.name = "skeleton"
-        renderCharAnim state.jester, 4, 150
-        renderCharAnim state.skeleton, 4, 1100
+        state.adventurer.name = "Adventurer/adventurer-idle-"
+        state.skeleton.name = "my_skeleton/skeleton"
+        state.slime.name = "Slime/slime-idle-"
+        renderCharAnim state.adventurer, 3, 150, 120, 216, 160, 20
+        renderCharAnim state.skeleton, 4, 1000
+        renderCharAnim state.slime, 4, 900, 120, 80, 80, 18
+
 
         # The .map function on Array is used instead of any kind of looping.
         # .map returns a new object for every object within an Array.
-        outputs.primitives << state.inventory_area.map do |a|
-            { x: a.x, y: a.y, w: a.w, h: a.h, path: 'sprites/square/white.png' }
+        outputs.sprites << state.inventory_area.map do |a|
+            sprite_sheet_render state, 48, 90, 30, 40, a.x, a.y-5, a.w+5, a.h+25, 'sprites/added/Icons/GUI.png', 1, 1
         end
 
         alpha_transition ||= 255
         #transition the alpha of the interact UI in
-        if state.start && !state.rejected && !state.accepted
+        if state.cur_state == "started" 
             renderInteract easeIt(state, 0, 255, state.click_time+10)
         #transition the alpha of the interact UI out
-        elsif state.rejected || state.accepted
+        elsif state.cur_state == "accepted" || state.cur_state == "rejected" 
             alpha_transition = easeIt(state, 255, 0, state.click_time)
             renderInteract alpha_transition
 
@@ -168,7 +185,7 @@ class DungeonHandler
         end
 
         #transition the alpha of the interact button in
-        if !state.start
+        if state.cur_state != "started" 
             renderInteractButton easeIt(state, 0, 255, state.click_time)
         #transition the alpha of the interact button out
         else 
@@ -177,13 +194,13 @@ class DungeonHandler
 
         #transition the alpha of the fire interact UI in
         flame_size = 160
-        flame_x = 1060 
-        flame_y = 200
+        flame_x = 920 
+        flame_y = 80
         if state.render_fire_interact
-            outputs.sprites << [flame_x, flame_y, flame_size, flame_size, 'sprites/added/Flame.png', 0, easeIt(state, 0, 255, state.click_time+10)]
+            outputs.sprites << [flame_x, flame_y, flame_size, flame_size, 'sprites/added/my_icons/Flame.png', 0, easeIt(state, 0, 255, state.click_time+10)]
         #transition the alpha of the fire interact UI out
         elsif state.render_fire_interact_end
-            outputs.sprites << [flame_x, flame_y, flame_size, flame_size, 'sprites/added/Flame.png', 0, easeIt(state, 255, 0, state.click_time)]
+            outputs.sprites << [flame_x, flame_y, flame_size, flame_size, 'sprites/added/my_icons/Flame.png', 0, easeIt(state, 255, 0, state.click_time)]
         end
 
         # after the borders have been rendered, render the
@@ -201,7 +218,7 @@ class DungeonHandler
             # the main sprite, the black background, the quantity text, and a hover indication
             # if the mouse is currently hovering over the item.
             if item[:location] == :interact
-                if state.rejected == true
+                if state.cur_state == "rejected" 
                     allow_inventory_highlighting = !item
                     outputs.primitives << item_prefab(item, allow_inventory_highlighting, inputs.mouse, alpha_transition)
                     allow_inventory_highlighting = !state.held_item
@@ -224,10 +241,10 @@ class DungeonHandler
 
 
     #render protag
-    def renderCharAnim character, frameMax, x_pos, y_pos=250, width=80, height=160
+    def renderCharAnim character, frameMax, x_pos, y_pos=120, width=80, height=160, speed=30
         character.charAnimframe ||= 0 
         outputs.sprites << [x_pos, y_pos, width, height, "sprites/added/#{character.name}000#{character.charAnimframe}.png"]
-        if state.tick_count % 30 == 0
+        if state.tick_count % speed == 0
             character.charAnimframe += 1
             if character.charAnimframe >= frameMax
                 character.charAnimframe = 0
@@ -236,25 +253,44 @@ class DungeonHandler
     end 
 
 
+    #Sprite Sheet rendering
+    def sprite_sheet_render state, tile_x, tile_y, tile_w, tile_h, img_x, img_y, img_w, img_h, img_path, max_frames, tick_time, alpha=255
+        should_the_index_repeat = true
+        tile_index = state.sprite_sheet.frame_index(max_frames, tick_time, should_the_index_repeat)
+      
+        {
+            x: img_x,
+            y: img_y,
+            w: img_w,
+            h: img_h,
+            path: img_path,
+            tile_x: tile_x + (tile_index * img_w),
+            tile_y: tile_y,
+            tile_w: tile_w,
+            tile_h: tile_h,
+            a: alpha,
+        }
+    end
+
+
     #handle rendering of interact UI
     def renderInteract alpha
-        outputs.sprites << [state.interact_border.x-30, state.interact_border.y-50, 380, 330, "sprites/added/Interact_UI.png", 0, alpha]
+        outputs.sprites << [state.interact_border.x-30, state.interact_border.y-50, 380, 330, "sprites/added/my_icons/Interact_UI.png", 0, alpha]
 
         # for each interact spot, create a sprite
-        outputs.primitives << state.interact_area.map do |a|
-            { x: a.x, y: a.y, w: a.w, h: a.h, path: 'sprites/square/white.png', a: alpha }
+        outputs.sprites << state.interact_area.map do |a|
+            sprite_sheet_render state, 48, 90, 30, 40, a.x-5, a.y-5, a.w+5, a.h+25, 'sprites/added/Icons/GUI.png', 1, 1, alpha
         end
 
         #draw interact buttons here:
-        outputs.sprites << [state.interact.accept.x, state.interact.accept.y, state.interact.accept_reject_w_h, state.interact.accept_reject_w_h, 'sprites/added/green_check.png', 0, alpha]
-        outputs.sprites << [state.interact.reject.x, state.interact.reject.y, state.interact.accept_reject_w_h, state.interact.accept_reject_w_h, 'sprites/added/red_x.png', 0, alpha]
+        outputs.sprites << [state.interact.accept.x, state.interact.accept.y, state.interact.accept_reject_w_h, state.interact.accept_reject_w_h, 'sprites/added/my_icons/green_check.png', 0, alpha]
+        outputs.sprites << [state.interact.reject.x, state.interact.reject.y, state.interact.accept_reject_w_h, state.interact.accept_reject_w_h, 'sprites/added/my_icons/red_x.png', 0, alpha]
     end
 
 
     #render the Interact button
     def renderInteractButton alpha
-        outputs.sprites << [state.interact.start.x, state.interact.start.y, state.interact.start.w, state.interact.start.h, 'sprites/square/green.png', 0, alpha]
-        outputs.labels  << [state.interact.start.x+20, state.interact.start.y+38, "Start Interaction", 1, 0, 0, 0, 0, alpha]
+        outputs.sprites << (sprite_sheet_render state, 17, 201, 30, 14, state.interact.start.x, state.interact.start.y, state.interact.start.w, state.interact.start.h, 'sprites/added/Icons/GUI.png', 1, 1, alpha)
     end 
 
 
@@ -269,14 +305,15 @@ class DungeonHandler
 
     #render the background with parallax
     def render_background
-        outputs.sprites << [0, 0, 1280, 720, 'sprites/added/background03.png']
+        outputs.sprites << [0, 0, 1280, 720, 'sprites/added/Parallax_woods/parallax-demon-woods-bg.png']
 
         #scroll_point_at = state.tick_count
         scroll_point_at ||= 0
         scroll_point_at = 1280 * (easeSpline state, outputs, 30)
 
-        outputs.sprites << scrolling_background(scroll_point_at, 'sprites/added/parallax_back03.png', 0.30)
-        outputs.sprites << scrolling_background(scroll_point_at, 'sprites/added/parallax_mid03.png', 0.50)
+        outputs.sprites << scrolling_background(scroll_point_at, 'sprites/added/Parallax_woods/parallax-demon-woods-far-trees.png', 0.30)
+        outputs.sprites << scrolling_background(scroll_point_at, 'sprites/added/Parallax_woods/parallax-demon-woods-mid-trees.png', 0.50)
+        outputs.sprites << scrolling_background(scroll_point_at, 'sprites/added/Parallax_woods/parallax-demon-woods-close-trees.png', 0.70)
     end
 
 
@@ -402,30 +439,27 @@ class DungeonHandler
                 checkStart  = inputs.mouse.click.point.inside_rect?(state.interact.start.rect)
 
                 #check if accept, reject, or start is clicked
-                if state.start && checkAccept
+                if checkAccept && state.cur_state == "started" 
                     #handle accept
-                    state.accepted = true
                     state.checked_interact_items = false
-                    state.start = false
-                    state.lastClicked = "accepted"
+                    state.last_state = state.cur_state
+                    state.cur_state  = "accepted"
                     state.render_fire_interact_end = false
                     state.click_time = state.tick_count
-                elsif state.start && checkReject
+                elsif checkReject && state.cur_state == "started"
                     #handle reject
-                    state.rejected = true
-                    state.start = false
-                    state.lastClicked = "rejected"
+                    state.last_state = state.cur_state
+                    state.cur_state = "rejected"
                     state.render_fire_interact_end = false
                     state.click_time = state.tick_count
 
                     #Add trauma and make sure not greater than 1
                     acceptTrauma = 0.3
                     state.trauma = (state.trauma+acceptTrauma) < 1 ? state.trauma+acceptTrauma : 1
-                elsif checkStart
+                elsif checkStart && state.cur_state != "started"
                     #handle start
-                    state.start = true
-                    state.rejected = false
-                    state.accepted = false
+                    state.last_state = state.cur_state
+                    state.cur_state = "started"
                     if state.render_fire_interact
                         state.render_fire_interact = false
                         state.render_fire_interact_end = true
@@ -456,7 +490,7 @@ class DungeonHandler
                 inventory_area = state.inventory_area.find { |a| inputs.mouse.click.point.inside_rect? a }
 
                 # if the click was within a interact area
-                if interact_area && !state.rejected
+                if interact_area && state.cur_state == "started" 
                     # check to see if an item is already there and ignore the click if an item is found
                     # item_at_interact_slot is a helper method that returns an item or nil for a given oridinal position
                     item_already_there = item_at_interact_slot interact_area[:ordinal_x], interact_area[:ordinal_y]
@@ -586,10 +620,8 @@ class DungeonHandler
                 state.render_fire_interact = true
                 #remove torch from interact 
                 state.interact_items_accepted.reject! { |i| i[:id] == :torch }
-            elsif item[:id] == :gold_coin
-                #Do something here -->
-                #remove gold coin from interact 
-                state.interact_items_accepted.reject! { |i| i[:id] == :gold_coin }
+            elsif item[:id] == :health_potion || item[:id] == :copper_coin || item[:id] == :mana_potion
+                state.interact_items_accepted.reject! { |i| i[:id] == item[:id] }
             end 
         end 
     end 
@@ -598,7 +630,6 @@ end
 $dungeon_handler = DungeonHandler.new
 
 def render_and_zoom dungeon, state, outputs, x_shift, y_shift, w_shift, h_shift, click_time, zoom_duration 
-    state.firstStart ||= false
 
 =begin 
     #Camera Shake: 
@@ -643,31 +674,29 @@ def render_and_zoom dungeon, state, outputs, x_shift, y_shift, w_shift, h_shift,
 
 
     #if interact UI accept button clicked then zoom in
-    if state.accepted 
+    if state.cur_state == "accepted" 
         outputs.sprites << [easeIt(state, 0,    x_shift,    click_time, zoom_duration), 
                             easeIt(state, 0,    y_shift,    click_time, zoom_duration), 
                             easeIt(state, 1280, w_shift,    click_time, zoom_duration), 
                             easeIt(state, 720,  h_shift,    click_time, zoom_duration), 
                             dungeon] #zoom in
-        state.firstStart = true
 
-    elsif state.rejected
+    elsif state.cur_state == "rejected" 
         outputs.sprites << [easeIt(state, 0,    state.offsetX,    click_time, state.cameraShakeDuration), 
                             easeIt(state, 0,    state.offsetY,    click_time, state.cameraShakeDuration), 
                             1280,
                             720,  
                             dungeon,
                             state.shakyCamera.angle] #camera shake
-        state.firstStart = true
 
-    elsif state.start && state.firstStart && state.lastClicked == "accepted"
+    elsif state.cur_state == "started" && state.last_state == "accepted"
         outputs.sprites << [easeIt(state, x_shift, 0,    click_time, zoom_duration), 
                             easeIt(state, y_shift, 0,    click_time, zoom_duration), 
                             easeIt(state, w_shift, 1280, click_time, zoom_duration), 
                             easeIt(state, h_shift, 720,  click_time, zoom_duration), 
                             dungeon] #zoom out
     
-    elsif state.start && state.firstStart && state.lastClicked == "rejected"
+    elsif state.cur_state == "started" && state.last_state == "rejected"
         outputs.sprites << [easeIt(state, state.offsetX, 0,    click_time, state.cameraShakeDuration), 
                             easeIt(state, state.offsetY, 0,    click_time, state.cameraShakeDuration), 
                             1280, 
@@ -689,5 +718,5 @@ def tick args
     $dungeon_handler.tick
 
     args.outputs.solids  << [-100, -100, 1380, 820, 0, 0, 0]
-    render_and_zoom :dungeon, args.state, args.outputs, -800, -300, 2120, 1193, args.state.click_time, 0.5
+    render_and_zoom :dungeon, args.state, args.outputs, -700, -150, 2120, 1193, args.state.click_time, 0.5
 end
