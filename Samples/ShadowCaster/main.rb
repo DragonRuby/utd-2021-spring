@@ -34,13 +34,10 @@ class ShadowCaster
     s.player_w ||= 8
     s.player_h ||= 8
     s.shadow_vector ||= 0
-    s.walls ||= [ new_wall(x: 400, y: 150, x2: 300, y2: 600),
-                  new_wall(x: 280, y: 100, x2: 780, y2: 600),
-                  new_wall(x: 0, y: 300, x2: 280, y2: 600),
-                  new_wall(x: 400, y: 100, x2: 580, y2: 300),
-                  new_wall(x: 600, y: 100, x2: 350, y2: 150),
-                  new_wall(x: 350, y: 200, x2: 800, y2: 150),
-                  new_wall(x: 100, y: 150, x2: 200, y2: 600)]
+    s.walls ||= [ new_wall(x: 200, y: 150, x2: 500, y2: 150),
+                  new_wall(x: 190, y: 170, x2: 190, y2: 470),
+                  new_wall(x: 200, y: 500, x2: 500, y2: 500),
+                  new_wall(x: 610, y: 190, x2: 610, y2: 490)]
 
     s.shadows ||=  360.map_with_index { |i| i}
                       .find_all { |i| i.zmod? 10 }
